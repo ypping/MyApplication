@@ -29,7 +29,7 @@ public class MyBroadcastReciver extends BroadcastReceiver {
                     intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     con.startActivity(intent1);
                 }
-            }, 500);
+            }, 100);
 
         }
     }
