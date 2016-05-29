@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
         int intenttype = getInternetType();
         Log.i("intentType", "intent:" + intenttype);
         setImage();
-        setDB();
+       // setDB();
 
     }
 
