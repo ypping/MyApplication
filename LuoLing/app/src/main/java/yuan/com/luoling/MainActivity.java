@@ -2,17 +2,17 @@ package yuan.com.luoling;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
-
 import org.xutils.DbManager;
 import org.xutils.ex.DbException;
-import org.xutils.ex.HttpException;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
@@ -28,6 +28,10 @@ import yuan.com.luoling.bean.LJImage;
 
 @ContentView(value = R.layout.activity_main)
 public class MainActivity extends Activity {
+    private final int INTERNET_WIFI = 1;
+    private final int INTERNET_CMWAP = 2;
+    private final int INTERNET_CMNET = 3;
+
     @ViewInject(value = R.id.main_image)
     private ImageView imageView;
     @ViewInject(value = R.id.main_image2)
@@ -39,6 +43,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         x.view().inject(this);
+        boolean br = isInternet();
+        Log.i("braaa", "" + br);
+        int intenttype = getInternetType();
+        Log.i("intentType", "intent:" + intenttype);
         setImage();
         setDB();
 
@@ -55,7 +63,8 @@ public class MainActivity extends Activity {
     }
 
     private void setImage() {
-        Picasso.with(getApplicationContext()).load(uri)
+
+        /*Picasso.with(getApplicationContext()).load(uri)
                 .placeholder(R.drawable.common_full_open_on_phone)
                 .error(R.drawable.common_ic_googleplayservices)
                 .fit().tag(getApplicationContext()).into(imageView);
@@ -65,8 +74,8 @@ public class MainActivity extends Activity {
                 Intent intent = new Intent(MainActivity.this, MyActivity.class);
                 startActivity(intent);
             }
-        });
-        // Picasso.with(getApplicationContext()).load(new File(filePath + "123.jpg")).into();
+        });*/
+
         x.image().bind(image2, "http://pic.baike.soso.com/p/20090711/20090711101754-314944703.jpg");
     }
 
@@ -115,4 +124,45 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * 判断是否有网络
+     *
+     * @return
+     */
+    public boolean isInternet() {
+        ConnectivityManager connection = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connection.getActiveNetworkInfo();
+
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    }
+
+    /**
+     * 判断网络的类型
+     *
+     * @return
+     */
+    public int getInternetType() {
+        int netType = 0;
+        ConnectivityManager connection = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connection.getActiveNetworkInfo();
+        if (networkInfo == null) {
+            startActivity(new Intent(Settings.ACTION_SETTINGS));
+            return netType;
+        }
+        int nType = networkInfo.getType();
+        if (nType == ConnectivityManager.TYPE_MOBILE) {
+            String info = networkInfo.getExtraInfo();
+            if (info.toLowerCase().equals("3gnet")) {
+                netType = 3;
+                Log.i("infoto", "info:" + info.toLowerCase().toLowerCase());
+            } else {
+                netType = 2;
+                Log.i("infoto", "info:" + info.toLowerCase().toLowerCase());
+            }
+        } else if (nType == ConnectivityManager.TYPE_WIFI) {
+            netType = 1;
+        }
+
+        return netType;
+    }
 }
